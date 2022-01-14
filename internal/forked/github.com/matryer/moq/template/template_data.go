@@ -7,11 +7,10 @@ import (
 
 // Data is the template data used to render the Moq template.
 type Data struct {
-	PkgName         string
-	SrcPkgQualifier string
-	Mocks           []MockData
-	StubImpl        bool
-	SyncPkg string
+	PkgName  string
+	Mocks    []MockData
+	StubImpl bool
+	SyncPkg  string
 }
 
 // MockData is the data used to generate a mock for some interface.
@@ -75,9 +74,9 @@ func (m MethodData) ReturnArgNameList() string {
 // ParamData is the data which represents a parameter to some method of
 // an interface.
 type ParamData struct {
-	Name string
-	Type string
-	Pointer bool
+	Name     string
+	Type     string
+	Pointer  bool
 	Variadic bool
 }
 

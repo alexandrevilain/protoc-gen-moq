@@ -1,6 +1,10 @@
 package main
 
 import (
+	"flag"
+	"path"
+	"strings"
+
 	"github.com/alexandrevilain/protoc-gen-moq/internal/forked/github.com/matryer/moq/template"
 	"google.golang.org/protobuf/compiler/protogen"
 )
@@ -8,15 +12,22 @@ import (
 var (
 	contextPackage = protogen.GoImportPath("context")
 	grpcPackage    = protogen.GoImportPath("google.golang.org/grpc")
+
+	filePrefix *string
 )
 
 func main() {
-	protogen.Options{}.Run(func(gen *protogen.Plugin) error {
+	var flags flag.FlagSet
+	filePrefix = flags.String("file_prefix", "", "Add prefix to the generated file (eg. /mock)")
+
+	protogen.Options{
+		ParamFunc: flags.Set,
+	}.Run(func(gen *protogen.Plugin) error {
 		for _, f := range gen.Files {
 			if !f.Generate {
 				continue
 			}
-			err := generateFile(gen, f)
+			err := generateFile(gen, f, *filePrefix)
 			if err != nil {
 				return err
 			}
@@ -25,14 +36,27 @@ func main() {
 	})
 }
 
-func generateFile(gen *protogen.Plugin, file *protogen.File) error {
+func rewriteFileNameWithPrefix(filepath, prefix string) string {
+	return path.Join(path.Dir(filepath), prefix+path.Base(filepath))
+}
+
+func generateFile(gen *protogen.Plugin, file *protogen.File, filePrefix string) error {
 	if len(file.Services) == 0 {
 		return nil // skip file generation when no service found
 	}
 
-	filename := file.GeneratedFilenamePrefix + "_moq.pb.go"
+	filepath := file.GeneratedFilenamePrefix + "_moq.pb.go"
+	if filePrefix != "" {
+		filepath = rewriteFileNameWithPrefix(filepath, filePrefix)
+	}
 
-	g := gen.NewGeneratedFile(filename, file.GoImportPath)
+	importPath := file.GoImportPath
+	if strings.HasSuffix(filePrefix, "/") {
+		basePath := strings.Trim(importPath.String(), "\"")
+		importPath = protogen.GoImportPath(path.Join(basePath, filePrefix))
+	}
+
+	g := gen.NewGeneratedFile(filepath, importPath)
 
 	t, err := template.New()
 	if err != nil {
@@ -100,7 +124,7 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) error {
 		}
 
 		mocks[i] = template.MockData{
-			InterfaceName: clientName,
+			InterfaceName: g.QualifiedGoIdent(file.GoImportPath.Ident(clientName)),
 			MockName:      clientName + "Mock",
 			Methods:       methods,
 		}

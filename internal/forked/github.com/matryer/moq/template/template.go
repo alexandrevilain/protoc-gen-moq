@@ -37,15 +37,15 @@ package {{.PkgName}}
 
 {{range $i, $mock := .Mocks -}}
 
-// Ensure, that {{.MockName}} does implement {{$.SrcPkgQualifier}}{{.InterfaceName}}.
+// Ensure, that {{.MockName}} does implement {{.InterfaceName}}.
 // If this is not the case, regenerate this file with moq.
-var _ {{$.SrcPkgQualifier}}{{.InterfaceName}} = &{{.MockName}}{}
+var _ {{.InterfaceName}} = &{{.MockName}}{}
 
-// {{.MockName}} is a mock implementation of {{$.SrcPkgQualifier}}{{.InterfaceName}}.
+// {{.MockName}} is a mock implementation of {{.InterfaceName}}.
 //
 // 	func TestSomethingThatUses{{.InterfaceName}}(t *testing.T) {
 //
-// 		// make and configure a mocked {{$.SrcPkgQualifier}}{{.InterfaceName}}
+// 		// make and configure a mocked {{.InterfaceName}}
 // 		mocked{{.InterfaceName}} := &{{.MockName}}{ 
 			{{- range .Methods}}
 // 			{{.Name}}Func: func({{.ArgList}}) {{.ReturnArgTypeList}} {
@@ -54,7 +54,7 @@ var _ {{$.SrcPkgQualifier}}{{.InterfaceName}} = &{{.MockName}}{}
 			{{- end}}
 // 		}
 //
-// 		// use mocked{{.InterfaceName}} in code that requires {{$.SrcPkgQualifier}}{{.InterfaceName}}
+// 		// use mocked{{.InterfaceName}} in code that requires {{.InterfaceName}}
 // 		// and then make assertions.
 //
 // 	}
