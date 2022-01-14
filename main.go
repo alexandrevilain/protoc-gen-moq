@@ -26,6 +26,10 @@ func main() {
 }
 
 func generateFile(gen *protogen.Plugin, file *protogen.File) error {
+	if len(file.Services) == 0 {
+		return nil // skip file generation when no service found
+	}
+
 	filename := file.GeneratedFilenamePrefix + "_moq.pb.go"
 
 	g := gen.NewGeneratedFile(filename, file.GoImportPath)

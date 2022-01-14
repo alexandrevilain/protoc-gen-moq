@@ -1,10 +1,10 @@
 .PHONY: build
 build:
-	go build ./cmd/...
+	go build -o protoc-gen-moq .
 
 .PHONY: install
 install:
-	go install ./cmd/...
+	go install .
 
 .PHONY: unit-test
 unit-test:
